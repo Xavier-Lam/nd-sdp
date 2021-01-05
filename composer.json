@@ -1,0 +1,29 @@
+{
+    "name": "nd/sdp",
+    "version": "0.0.2",
+    "type": "library",
+    "description": "工程院共享平台SDP PHP SDK",
+    "keywords": [
+        "nd",
+        "sdp"
+    ],
+    "homepage": "https://github.com/Xavier-Lam",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Xavier-Lam",
+            "email": "xavierlam7@hotmail.com",
+            "homepage": "https://github.com/Xavier-Lam",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "ND\\SDP\\": "SDP/"
+        }
+    },
+    "require": {
+        "php": ">=7.1",
+        "shisa/httpclient": ">=0.2.0"
+    }
+}
