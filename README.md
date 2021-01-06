@@ -12,6 +12,8 @@
   - [MAC鉴权](#mac鉴权)
   - [BTS鉴权](#bts鉴权)
   - [租户](#租户)
+- [Services](#services)
+  - [敏感词服务](#敏感词服务)
 - [Contributing](#contributing)
 - [CHANGELOG](#changelog)
 
@@ -89,6 +91,17 @@
 
     $tenant = \ND\SDP\SdpTenant::byApp($app);
     $data = $client->wallet($tenant)->point->currencies();
+
+## Services
+### 敏感词服务
+    $client = new SdpClient();
+    $client->setAuth($auth);
+    $configLoader = new BasicConfigLoader($client, $appId);
+    $censorService = new FullMatchCensorService($configLoader);
+    $text = "习近平和毛泽东";
+    $censorService->testString($text);  // true
+    $censorService->highlight($text);  // [[1,2], [4,3], [0,3]]
+    $censorService->censor($text);  // ***和***
 
 ## [Contributing](#CONTRIBUTING.md)
 
