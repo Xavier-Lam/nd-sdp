@@ -42,6 +42,6 @@ class BasicConfigLoader implements IConfigLoader
         foreach($groups as $group) {
             $patterns = array_merge($patterns, $this->getByDentryId($group['base_dentry_id']));
         }
-        return array_values(array_unique($patterns));
+        return array_values(array_unique(array_filter($patterns)));
     }
 }
