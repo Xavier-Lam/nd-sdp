@@ -1,6 +1,7 @@
 <?php
 namespace ND\SDP\UC;
 
+use InvalidArgumentException;
 use ND\SDP\Auth\MacAuth;
 use ND\SDP\SdpApp;
 use ND\SDP\SdpOrg;
@@ -39,9 +40,14 @@ class User extends MacAuth
     public $expiresAt;
 
     /**
+     * 第三方参数
+     */
+    private $third = [];
+
+    /**
      * @param SdpApp $app
      */
-    public static function getByData($data, SdpApp $app = null, Session $session = null)
+    public static function getByData($data, ?SdpApp $app = null, Session $session = null)
     {
         if($session) {
             // 传session则解密mac_key和account_id
@@ -63,6 +69,11 @@ class User extends MacAuth
         if(!$app && $data['app']) {
             $rv->app = SdpApp::singleton($data['app']['sdp-app-id'], $data['app']['env']);
         }
+
+        if($data['third']) {
+            $rv->third = $data['third'];
+        }
+
         return $rv;
     }
 
@@ -96,6 +107,19 @@ class User extends MacAuth
         $this->expiresAt = new \DateTime($data['expires_at']);
     }
 
+    public function getThird($key = null)
+    {
+        if($key && !isset($this->third[$key])) {
+            throw new InvalidArgumentException('third key not exists');
+        }
+        return $key? $this->third[$key]: $this->third;
+    }
+
+    public function setThird($data)
+    {
+        $this->third = $data;
+    }
+
     public function getData()
     {
         $rv = [
@@ -112,6 +136,10 @@ class User extends MacAuth
                 'sdp-app-id' => $this->app->sdpAppId,
                 'env' => $this->app->env
             ];
+        }
+
+        if($this->third) {
+            $rv['third'] = $this->third;
         }
 
         return $rv;

@@ -20,14 +20,16 @@ class WeChatPub extends BaseUCClient
      * @param $code 微信重定向code
      * @return User
      */
-    public function webCreate(Session $session, $appId, $code, $autoRegister = true)
+    public function webCreate(Session $session, $appId, $code, $scope='', $autoRegister = true)
     {
         $url = '/v1.1/wxpub/web/tokens/actions/create_by_third_account';
+        $redirectParams = [
+            'app_id' => $appId,
+            'code' => $code
+        ];
+        $scope && $redirectParams['scope'] = $scope;
         $data = $this->sendWithApp($session->app, $url, 'POST', [
-            'redirect_params' => http_build_query([
-                'app_id' => $appId,
-                'code' => $code
-            ]),
+            'redirect_params' => http_build_query($redirectParams),
             'session_id' => $session->id,
             'auto_register' => $autoRegister
         ])->json();
