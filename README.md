@@ -9,9 +9,11 @@
   - [创建客户端](#创建客户端)
   - [新建会话](#新建会话)
   - [调用接口](#调用接口)
-  - [MAC鉴权](#mac鉴权)
-  - [BTS鉴权](#bts鉴权)
-  - [租户](#租户)
+    - [MAC鉴权](#mac鉴权)
+    - [BTS鉴权](#bts鉴权)
+    - [延迟鉴权](#延迟鉴权)
+    - [refreshtoken的更新](#refreshtoken的更新)
+    - [租户](#租户)
 - [Services](#services)
   - [敏感词服务](#敏感词服务)
 - [Contributing](#contributing)
@@ -72,21 +74,39 @@
     // 创建组织
     $client->admin->org->create($orgName, $orgCode, $nodeType, ['person_join_type' => 1]);
 
-更多接口请自行尝试,没有的接口参阅[CONTRIBUTING](CONTRIBUTING.md) 提交
+更多接口请自行尝试,没有的接口参阅[CONTRIBUTING](CONTRIBUTING.md) 提交,或直接通过send方法调用
 
-### MAC鉴权
+#### MAC鉴权
 对于需要mac鉴权的接口,先设置授权
 
     $ucUser = new \ND\SDP\UC\User($accountId, 'person', $app, $accessToken, $macKey, $refreshToken)
     $client->setAuth($user);
 
-### BTS鉴权
+#### BTS鉴权
 
     $bts = \ND\SDP\BTSApp::get($name, $secret, $id);
     $token = $client->bts->token->get($bts);
     $client->setAuth($token);
 
-### 租户
+#### 延迟鉴权
+有时我们已经持有accesstoken,或可能不需要已鉴权的用户,可通过setLoginInfo延迟鉴权,等到需要鉴权的时候,再使用账号密码登录
+
+    $loginInfo = [
+        'session' => Session::current($app),
+        'loginname' => 'xxx',
+        'password' => '',
+        'orgCode' => ''
+    ];
+    $user = new \ND\SDP\UC\User();
+    $user->setLoginInfo($loginInfo);
+    $client->setAuth($user);
+
+#### refreshtoken的更新
+    $user->subscribe($user::EVENT_TOKENREFRESHED, function(User $user, $data) {
+        $data['refresh_token'];  // 新更新的token
+    });
+
+#### 租户
 部分接口是租户接口
 
     $tenant = \ND\SDP\SdpTenant::byApp($app);
