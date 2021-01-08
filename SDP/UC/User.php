@@ -5,7 +5,6 @@ use InvalidArgumentException;
 use ND\SDP\Auth\MacAuth;
 use ND\SDP\SdpApp;
 use ND\SDP\SdpOrg;
-use ND\SDP\Utils;
 
 class User extends MacAuth
 {
@@ -45,22 +44,15 @@ class User extends MacAuth
     private $third = [];
 
     /**
+     * 登录参数
+     */
+    private $loginInfo = null;
+
+    /**
      * @param SdpApp $app
      */
-    public static function getByData($data, ?SdpApp $app = null, Session $session = null)
+    public static function getByData($data, ?SdpApp $app = null)
     {
-        if($session) {
-            // 传session则解密mac_key和account_id
-            $sessionKey = $session->getSessionKey();
-            $data['mac_key'] = Utils::decryptDes($data['mac_key'], $sessionKey);
-            if($data['account_id']) {
-                $data['account_id'] =  Utils::decryptDes($data['account_id'], $sessionKey);
-            }
-            if($data['user_id']) {
-                $data['user_id'] =  Utils::decryptDes($data['user_id'], $sessionKey);
-            }
-        }
-
         $uid = $data['account_type'] == static::TYPE_PERSON?
             $data['account_id']: $data['user_id'];
         $rv = new static($uid, $data['account_type'], $app);
@@ -78,7 +70,7 @@ class User extends MacAuth
     }
 
     public function __construct(
-        $uid,
+        $uid = null,
         $accountType = User::TYPE_PERSON,
         SdpApp $app = null,
         $accessToken = null,
@@ -99,12 +91,68 @@ class User extends MacAuth
         parent::__construct($accessToken, $macKey, $refreshToken, $expiresAt);
     }
 
+    public function auth()
+    {
+        if($this->loginInfo) {
+            $data = $this->getClient()->uc->token->login(
+                $this->loginInfo['session'],
+                $this->loginInfo['loginname'],
+                $this->loginInfo['password'],
+                $this->loginInfo['orgCode'],
+                '',
+                $this->loginInfo['loginType'],
+                $this->loginInfo['countryCode'],
+                true
+            );
+
+            $this->update($data);
+            if(isset($data['account_id']) && $this->accountId != $data['account_id']) {
+                $this->accountId = $data['account_id'];
+            }
+            if(isset($data['user_id']) && $this->userId != $data['user_id']) {
+                $this->userId = $data['user_id'];
+            }
+
+            $this->fire(static::EVENT_TOKENREFRESHED, $this, $data);
+        } else {
+            parent::auth();
+        }
+    }
+
+    public function refresh()
+    {
+        try {
+            parent::refresh();
+        }
+        catch(\Exception $e) {
+            if($this->loginInfo) {
+                // 对于有loginInfo的 尝试重新登录
+                $this->auth();
+                return;
+            }
+            throw $e;
+        }
+    }
+
     public function update($data)
     {
         $this->accessToken = $data['access_token'];
         $this->macKey = $data['mac_key'];
         $this->refreshToken = $data['refresh_token'];
         $this->expiresAt = new \DateTime($data['expires_at']);
+    }
+
+    /**
+     * @param array $data {loginname, password, session, orgCode, loginType, countryCode}
+     */
+    public function setLoginInfo($data)
+    {
+        $this->loginInfo = $data + [
+            'session' => Session::current($this->app, $this->getClient()),
+            'orgCode' => '',
+            'loginType' => '',
+            'countryCode' => '+86'
+        ];
     }
 
     public function getThird($key = null)

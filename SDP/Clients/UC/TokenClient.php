@@ -16,7 +16,7 @@ class TokenClient extends BaseUCClient
      * 密码登录
      * http://wiki.doc.101.com/index.php?title=身份认证领域-前端接口#.5BPOST.5D.2Ftokens_.E5.AF.86.E7.A0.81.E7.99.BB.E5.BD.95
      */
-    public function login(Session $session, $loginname, $password, $orgCode = '', $identifyCode = '', $loginType = '', $countryCode = '+86')
+    public function login(Session $session, $loginname, $password, $orgCode = '', $identifyCode = '', $loginType = '', $countryCode = '+86', $raw = false)
     {
         $sessionId = $session->getSessionId();
         $sessionKey = $session->getSessionKey();
@@ -35,9 +35,15 @@ class TokenClient extends BaseUCClient
             ]
         )->json();
 
-        $auth = User::getByData($data, $session->app, $session);
-        $auth->setClient($this->getBaseClient());
-        return $auth;
+        $data = $this->decryptUserData($session, $data);
+
+        if($raw) {
+            return $data;
+        } else {
+            $auth = User::getByData($data, $session->app);
+            $auth->setClient($this->getBaseClient());
+            return $auth;
+        }
     }
 
     /**
@@ -58,7 +64,9 @@ class TokenClient extends BaseUCClient
             ]
         )->json();
 
-        $auth = User::getByData($data, $session->app, $session);
+        $data = $this->decryptUserData($session, $data);
+
+        $auth = User::getByData($data, $session->app);
         $auth->setClient($this->getBaseClient());
         return $auth;
     }
@@ -123,5 +131,22 @@ class TokenClient extends BaseUCClient
             "/v1.1/tokens/{$user->accessToken}",
             "DELETE"
         );
+    }
+
+    /**
+     * 解码经session加密的数据
+     */
+    public function decryptUserData(Session $session, $data)
+    {
+        // 传session则解密mac_key和account_id
+        $sessionKey = $session->getSessionKey();
+        $data['mac_key'] = Utils::decryptDes($data['mac_key'], $sessionKey);
+        if($data['account_id']) {
+            $data['account_id'] =  Utils::decryptDes($data['account_id'], $sessionKey);
+        }
+        if($data['user_id']) {
+            $data['user_id'] =  Utils::decryptDes($data['user_id'], $sessionKey);
+        }
+        return $data;
     }
 }

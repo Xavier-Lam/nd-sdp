@@ -11,6 +11,8 @@ class BasicConfigLoader implements IConfigLoader
 {
     protected $client;
     protected $appId;
+    protected $appGroups = [];
+    protected $dentries = [];
 
     /**
      * @param SdpClient $client 需已授权
@@ -23,16 +25,22 @@ class BasicConfigLoader implements IConfigLoader
 
     public function getByDentryId($dentryId)
     {
-        $client = new HTTPClient();
-        $url = 'https://cs.101.com/v0.1/download';
-        $resp = $client->send($url, 'GET', ['dentryId' => $dentryId]);
-        return explode("\n", $resp->content);
+        if(!isset($this->dentries[$dentryId])) {
+            $client = new HTTPClient();
+            $url = 'https://cs.101.com/v0.1/download';
+            $resp = $client->send($url, 'GET', ['dentryId' => $dentryId]);
+            $this->dentries[$dentryId] = explode("\n", $resp->content);
+        }
+        return $this->dentries[$dentryId];
     }
 
     public function getGroups($version = 0)
     {
-        $data = $this->client->censor2->app->cAppConfig($this->appId);
-        return $data['lexicon_groups'];
+        if(!isset($this->appGroups[$this->appId])) {
+            $data = $this->client->censor2->app->cAppConfig($this->appId);
+            $this->appGroups[$this->appId] = $data['lexicon_groups'];
+        }
+        return $this->appGroups[$this->appId];
     }
 
     public function getPatterns($version = 0)

@@ -12,6 +12,9 @@ class SdpApp
 
     private static $_registry = [];
 
+    /**
+     * @return static
+     */
     public static function singleton($sdpAppId, $env = null)
     {
         if(!isset(static::$_registry[$sdpAppId])) {
