@@ -6,24 +6,14 @@ namespace ND\SDP\Services\Censor;
  */
 class FullMatchCensorService extends AbstractCensorService implements ICensorService
 {
-    public function testString($string): bool
+    protected function getMatchPos($string, $pattern): int
     {
-        return !!$this->highlight($string, 1);
+        $pos = mb_strpos($string, $pattern);
+        return $pos === false? -1: $pos;
     }
 
-    public function highlight($string, $limit = null): array
+    protected function getMatchLength($string, $pattern, $pos): int
     {
-        $patterns = $this->configLoader->getPatterns();
-        $rv = [];
-        foreach($patterns as $pattern) {
-            $pos = mb_strpos($string, $pattern);
-            if($pos !== false) {
-                $rv[] = [$pos, mb_strlen($pattern)];
-                if($limit && count($rv) >= $limit) {
-                    break;
-                }
-            }
-        }
-        return $rv;
+        return mb_strlen($pattern);
     }
 }

@@ -22,4 +22,10 @@ interface ICensorService
      * @return array[] [[开始位置,长度],[开始位置,长度]...]
      */
     function highlight($string, $limit = null): array;
+
+    /**
+     * 获取命中的敏感词
+     * @return string[] 命中的敏感词
+     */
+    function getMatches($string, $limit = null): array;
 }
