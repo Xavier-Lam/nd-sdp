@@ -33,7 +33,10 @@ class WeChatPub extends BaseUCClient
             'session_id' => $session->id,
             'auto_register' => $autoRegister
         ])->json();
-        return User::getByData($data, $session->app, $session);
+
+        $data = $session->decryptUserData($data);
+
+        return User::getByData($data, $session->app);
     }
 
     /**

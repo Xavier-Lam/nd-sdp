@@ -35,7 +35,7 @@ class TokenClient extends BaseUCClient
             ]
         )->json();
 
-        $data = $this->decryptUserData($session, $data);
+        $data = $session->decryptUserData($data);
 
         if($raw) {
             return $data;
@@ -64,7 +64,7 @@ class TokenClient extends BaseUCClient
             ]
         )->json();
 
-        $data = $this->decryptUserData($session, $data);
+        $data = $session->decryptUserData($data);
 
         $auth = User::getByData($data, $session->app);
         $auth->setClient($this->getBaseClient());
@@ -131,22 +131,5 @@ class TokenClient extends BaseUCClient
             "/v1.1/tokens/{$user->accessToken}",
             "DELETE"
         );
-    }
-
-    /**
-     * 解码经session加密的数据
-     */
-    public function decryptUserData(Session $session, $data)
-    {
-        // 传session则解密mac_key和account_id
-        $sessionKey = $session->getSessionKey();
-        $data['mac_key'] = Utils::decryptDes($data['mac_key'], $sessionKey);
-        if($data['account_id']) {
-            $data['account_id'] =  Utils::decryptDes($data['account_id'], $sessionKey);
-        }
-        if($data['user_id']) {
-            $data['user_id'] =  Utils::decryptDes($data['user_id'], $sessionKey);
-        }
-        return $data;
     }
 }
