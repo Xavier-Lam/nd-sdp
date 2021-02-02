@@ -34,7 +34,9 @@ class AccountClient extends BaseUCClient
             ]
         )->json();
 
-        return User::getByData($session->app, $data, $session);
+        $data = $session->decryptUserData($data);
+
+        return User::getByData($session->app, $data);
     }
 
     /**
@@ -65,7 +67,9 @@ class AccountClient extends BaseUCClient
         $url = "/v1.1/person_accounts/$accountId/actions/join_org";
         $data = $this->sendWithAppAuth($session->app, $url, 'POST', $data)->json();
 
-        return User::getByData($data, $session->app, $session);
+        $data = $session->decryptUserData($data);
+
+        return User::getByData($data, $session->app);
     }
 
     /**
