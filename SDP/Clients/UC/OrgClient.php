@@ -36,14 +36,20 @@ class OrgClient extends BaseUCClient
      */
     public function queryOrg($type, $items)
     {
-        return $this->sendWithAuth(
+        $isString = false;
+        if(is_string($items)) {
+            $items = [$items];
+            $isString = true;
+        }
+        $items = $this->sendWithAuth(
             "/v1.1/organizations/actions/query",
             [
                 'type' => $type,
                 'items' => $items
             ],
             'POST'
-        )->json();
+        )->json()['items'];
+        return $isString? $items[0]: $items;
     }
 
     /**
