@@ -1,6 +1,6 @@
 {
     "name": "nd/sdp",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "type": "library",
     "description": "工程院共享平台SDP PHP SDK",
     "keywords": [
