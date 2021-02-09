@@ -5,6 +5,7 @@ use ND\SDP\SdpApp;
 use ND\SDP\UC\Session;
 use ND\SDP\UC\User;
 use ND\SDP\Utils;
+use stdClass;
 
 class TokenClient extends BaseUCClient
 {
@@ -81,25 +82,72 @@ class TokenClient extends BaseUCClient
         $nonce = User::createNonce();
         $method = 'POST';
         $requestUri = '/';
-        $sdpHeaders = [];
-        $mac = User::createMac($nonce, $method, $requestUri, $host, $sdpHeaders);
-        $response = $this->sendWithApp(
+        $mac = User::createMac($nonce, $method, $requestUri, $host, $user->macKey);
+        $data = $this->validByParams(
             $app?: $user->app,
-            "/v1.1/tokens/{$user->accessToken}/actions/valid",
+            $mac,
+            $user->accessToken,
+            $nonce,
+            $host,
+            $method,
+            $requestUri,
+            null,
+            true
+        );
+        $user->update($data);
+        $user->setClient($this->getBaseClient());
+        return $user;
+    }
+
+    /**
+     * 令牌检查
+     * http://wiki.doc.101.com/index.php?title=身份认证领域-前端接口#.5BPOST.5D.2Ftokens.2F.7Baccess_token.7D.2Factions.2Fvalid_.E4.BB.A4.E7.89.8C.E6.A3.80.E6.9F.A5
+     */
+    public function validByParams(SdpApp $app, $mac, $accessToken, $nonce, $host, $method = 'GET', $uri = '/', $headers = null, $raw = false)
+    {
+        $data = $this->sendWithApp(
+            $app,
+            "/v1.1/tokens/{$accessToken}/actions/valid",
             'POST',
             [
                 'mac' => $mac,
                 'nonce' => $nonce,
                 'http_method' => $method,
-                'request_uri' => $requestUri,
+                'request_uri' => $uri,
                 'host' => $host,
-                'header_params' => $sdpHeaders
+                'header_params' => $headers?: new stdClass
             ]
+        )->json();
+        if($raw) {
+            return $data;
+        }
+        return User::getByData($data, $app);
+    }
+
+    /**
+     * 令牌检查
+     * http://wiki.doc.101.com/index.php?title=身份认证领域-前端接口#.5BPOST.5D.2Ftokens.2F.7Baccess_token.7D.2Factions.2Fvalid_.E4.BB.A4.E7.89.8C.E6.A3.80.E6.9F.A5
+     */
+    public function validateRequest(SdpApp $app, $mac, $accessToken, $nonce, $raw = false)
+    {
+        $host = $_SERVER['REQUEST_HOST'];
+        $method = $_SERVER['REQUEST_METHOD'];
+        $uri = $_SERVER['REQUEST_URI'];
+        // $headers = array_filter($_SERVER, function($o) {
+        //     return substr($o, 0, 9) == 'HTTP_SDP_';
+        // }, ARRAY_FILTER_USE_KEY);
+        // ksort($headers);
+        return $this->validByParams(
+            $app,
+            $mac,
+            $accessToken,
+            $nonce,
+            $host,
+            $method,
+            $uri,
+            null,
+            $raw
         );
-        $data = $response->json();
-        $user->update($data);
-        $user->setClient($this->getBaseClient());
-        return $user;
     }
 
     /**
