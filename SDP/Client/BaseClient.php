@@ -22,7 +22,12 @@ class BaseClient extends HTTPClient
     {
         $env = $this->getBaseClient()->getEnv();
         if($env) {
-            $baseUrl = constant(get_class($this) . '::ENV_' . $env);
+            try {
+                $baseUrl = constant(get_class($this) . '::ENV_' . $env);
+            }
+            catch(\Error $e) {
+
+            }
         }
         return $baseUrl?: parent::getBaseUrl();
     }
