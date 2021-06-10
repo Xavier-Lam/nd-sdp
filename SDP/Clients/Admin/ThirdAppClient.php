@@ -21,6 +21,20 @@ class ThirdAppClient extends AuthClient
     }
 
     /**
+     * 查看应用的第三方应用信息配置
+     * https://wiki.doc.101.com/index.php?title=身份认证领域-管理端接口#.5BGET.5D_.2FthirdApps.2F.7Bsdp_app_id.7D.2Fthird-configs.3F.24offset.3D0.26.24limit.3D10.26.24count.3Dtrue_.E6.9F.A5.E7.9C.8B.E5.BA.94.E7.94.A8.E7.9A.84.E7.AC.AC.E4.B8.89.E6.96.B9.E5.BA.94.E7.94.A8.E4.BF.A1.E6.81.AF.E9.85.8D.E7.BD.AE
+     */
+    public function getThirdConfigs($sdpAppId, $offset = 0, $limit = 100)
+    {
+        $data = [
+            '$offset' => $offset,
+            '$limit' => $limit,
+            'count' => true
+        ];
+        return $this->sendWithAuth("/v1.1/thirdApps/$sdpAppId/third-configs", $data, 'GET')->json();
+    }
+
+    /**
      * 修改应用的第三方应用信息配置
      * https://wiki.doc.101.com/index.php?title=身份认证领域-管理端接口#.5BPATCH.5D_.2FthirdApps.2F.7Bsdp_app_id.7D.2Fthird-configs.2F.7Bapp_id.7D_.E4.BF.AE.E6.94.B9.E5.BA.94.E7.94.A8.E7.9A.84.E7.AC.AC.E4.B8.89.E6.96.B9.E5.BA.94.E7.94.A8.E4.BF.A1.E6.81.AF.E9.85.8D.E7.BD.AE
      */
