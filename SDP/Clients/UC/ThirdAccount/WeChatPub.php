@@ -36,6 +36,9 @@ class WeChatPub extends BaseUCClient
 
         $data = $session->decryptUserData($data);
 
+        $data['third'] = [
+            'openid' => $data['open_id']
+        ];
         return User::getByData($data, $session->app);
     }
 
