@@ -7,6 +7,7 @@ use ND\SDP\Clients\UC\BaseUCClient;
  * 第三方账户
  * https://wiki.doc.101.com/index.php?title=新第三方服务端
  * 
+ * @property MiniProgram $miniProgram 小程序
  * @property WeChatPub $wechatPub 微信公众号
  */
 class ThirdAccount extends BaseUCClient
@@ -17,6 +18,7 @@ class ThirdAccount extends BaseUCClient
     const ENV_HK = 'https://third-auth-proxy.hk.101.com';
 
     protected $clients = [
+        'miniProgram' => MiniProgram::class,
         'wechatPub' => WeChatPub::class
     ];
 }
