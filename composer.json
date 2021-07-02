@@ -1,6 +1,6 @@
 {
     "name": "nd/sdp",
-    "version": "0.1.8",
+    "version": "0.2.0",
     "type": "library",
     "description": "工程院共享平台SDP PHP SDK",
     "keywords": [
@@ -25,6 +25,6 @@
     "require": {
         "php": ">=7.1",
         "psr/simple-cache": ">=1.0.0",
-        "shisa/httpclient": ">=0.2.0"
+        "shisa/httpclient": ">=0.2.1"
     }
 }

@@ -14,6 +14,18 @@
     - [延迟鉴权](#延迟鉴权)
     - [refreshtoken的更新](#refreshtoken的更新)
     - [租户](#租户)
+- [Guide](#guide)
+  - [内容服务CS](#内容服务cs)
+    - [新建实例与鉴权](#新建实例与鉴权)
+      - [创建实例](#创建实例)
+      - [策略(Policy)](#策略policy)
+      - [鉴权](#鉴权)
+    - [上传文件](#上传文件)
+    - [下载文件](#下载文件)
+      - [下载](#下载)
+      - [生成下载地址](#生成下载地址)
+    - [管理文件](#管理文件)
+      - [删除文件](#删除文件)
 - [Services](#services)
   - [敏感词服务](#敏感词服务)
 - [Contributing](#contributing)
@@ -111,6 +123,75 @@
 
     $tenant = \ND\SDP\SdpTenant::byApp($app);
     $data = $client->wallet($tenant)->point->currencies();
+
+
+## Guide
+### 内容服务CS
+#### 新建实例与鉴权
+##### 创建实例
+* 采用token方式鉴权的实例
+
+        $auth = \ND\SDP\CS\Auth::create($ak, $sk);
+        $tokenFactory = \ND\SDP\CS\TokenFactory::create($auth, $serviceName);
+        $cs = new \ND\SDP\CS($tokenFactory);
+
+* 采用session方式鉴权的实例
+
+    **建议仅服务端采用**
+
+        $sessionFactory = \ND\SDP\CS\SessionFactory::create($serviceId, $serviceName);
+        $cs = new \ND\SDP\CS($sessionFactory);
+
+##### 策略(Policy)
+* 创建策略
+
+        $policy = \ND\SDP\CS\Policy::createByPath(
+            '/debug/测试中文上传.jpg',
+            Policy::SCOPE_PRIVATE,
+            Policy::TYPE_UPLOAD,
+            Policy::ROLE_ADMIN
+        );
+        echo $policy->json();
+
+##### 鉴权
+* 创建session
+    
+        $session = $cs->session->create($serviceId, "/$serviceName/debug/");
+
+* 生成token
+
+        $token = $tokenFactory->createToken($dateOrExpiresAt, $uriStr, $httpVerb, $policy);
+
+
+#### 上传文件
+* 直接上传
+
+        $dentry = $cs->upload->upload($policy, $file);
+
+#### 下载文件
+##### 下载
+* 直接下载
+
+        $response = $cs->download->download($policy);
+
+##### 生成下载地址
+* 伪静态下载地址
+
+    不建议采用session生成
+
+        $url = $cs->download->staticUrl($policy, 300);
+
+* 普通下载地址
+
+        $url = $cs->download->downloadUrl($policy, 300);
+
+
+#### 管理文件
+##### 删除文件
+
+    $cs->manage->delete($policy);
+
+
 
 ## Services
 ### 敏感词服务
