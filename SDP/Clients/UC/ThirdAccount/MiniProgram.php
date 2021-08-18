@@ -47,7 +47,7 @@ class MiniProgram extends BaseUCClient
     public function webBind(Session $session, $thirdPlatAppId, $code, $encryptedData='', $iv='')
     {
         $url = "/v1.1/miniprogram/web/actions/account_info";
-        $this->sendWithApp($session->app, $url, 'POST', [
+        $this->sendWithAppAuth($session->app, $url, 'PUT', [
             'code' => $code,
             'session_id' => $session->id,
             'third_plat_app_id' => $thirdPlatAppId,
