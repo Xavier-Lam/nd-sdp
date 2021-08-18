@@ -115,7 +115,7 @@ class User extends MacAuth
 
             $this->fire(static::EVENT_TOKENREFRESHED, $this, $data);
         } else {
-            parent::auth();
+            $this->refresh();
         }
     }
 
