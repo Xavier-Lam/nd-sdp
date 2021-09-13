@@ -51,7 +51,8 @@ class MacAuth extends AuthBase
 
     public function auth()
     {
-        throw new \RuntimeException('Not Implemented', -1);
+        // 尝试刷新refreshtoken
+        $this->refresh();
     }
 
     public function authRequestPostPrepare(PreparedRequest $preparedRequest, Request $request)
