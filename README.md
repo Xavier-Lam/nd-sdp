@@ -1,4 +1,4 @@
-# 网龙工程院共享平台(SDP) PHP SDK
+# NDSDP PHP SDK
 
 由于代码早先封装,之后移动了结构,可能导致命名空间之类的异常,如有发现,可修改并提交.
 
@@ -33,19 +33,16 @@
 
 ## Installation
 ### 直接安装
-1. 登录 http://git.sdp.nd
-2. 告知我们为你添加权限
-3. 将本机的ssh密钥添加至 http://git.sdp.nd/profile/keys
-4. 在composer.json 中添加
+在composer.json 中添加
 
         "repositories": [
             {
                 "type": "vcs",
-                "url":  "git@git.sdp.nd:ndkfc/nd-sdp.git"
+                "url":  "git@github.com:Xavier-Lam/nd-sdp.git"
             }
         ]
 
-5. composer require nd/sdp dev-master
+composer require nd/sdp dev-master
 
 ### 本地安装
 1. 将源码下载到本地
